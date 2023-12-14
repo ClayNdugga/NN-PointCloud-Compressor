@@ -1,5 +1,7 @@
 # NN-PointCloud-Compressor
 
+Note this project is ongoing: Sept 2023 - April 2024
+
 ## Introduction
 Compression is crucial for efficient storage and transmission of media. Current compression methods, such as JPEG for images, and MPEG for videos rely on linear transform coding. This works well for 2D media where spatial relationships are consistent and predictable. However, as we move towards more complex mediums that incorporate the third dimension, like point clouds, the limitations of linear transform coding become apparent.
 
