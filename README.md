@@ -14,3 +14,13 @@ This project follows the development of a Non-Linear Transform Coder for lossy d
 The following is diagram of a Non-linear Transform coder.
 
 ![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/NTC.png?raw=true)
+
+Starting on the left we have our PointCloud to be compressed which is then fed through a neural network. This network is the forward transform, serving as the non-linear function that maps our input data to a latent compressed representation. 
+
+At the heart of the non-linear transform coder is the N level quantizer. This component discretizes the continuous output of the forward transform into N buckets, destroying information in the processes, but enabling the data to be represented with fewer bits which is the main goal. 
+
+Next the data is passed through a lossless encoder-decoder pair, which seems redundant, but it allows us to obtain a code that can be used in the loss function when training the network.
+
+Following this process, the inverse transform attempts to reconstruct the original PointCloud using the quantized values.
+
+The loss function is a critical component of achieving effective results. It is defined as the sum of the Reconstructed Distortion and λ multiplied by the Compressed Code rate. The Reconstructed Distortion is calculated using the Chamfer Distance, which measures the average closest point distance between the original and reconstructed point clouds. The λ parameter helps to balance the importance between the fidelity of the reconstruction (low distortion) and the efficiency of the compression (low code rate). This ensure that the reconstructed point clouds are as close as possible to the original while maintaining a compact code representation.
