@@ -1,28 +1,80 @@
-# NN-PointCloud-Compressor
+# Nueral Network PointCloud Compression
 
 Note this project is ongoing: Sept 2023 - April 2024
 
 ## Introduction
-Compression is crucial for efficient storage and transmission of media. Current compression methods, such as JPEG for images, and MPEG for videos rely on linear transform coding. This works well for 2D media where spatial relationships are consistent and predictable. However, as we move towards more complex mediums that incorporate the third dimension, like point clouds, the limitations of linear transform coding become apparent.
+Compression is crucial for efficient storage and transmission of media. Current compression methods, such as JPEG for images, and MPEG for videos rely on **Linear Transform Coding**. This works well for 2D media where spatial relationships are consistent and predictable. However, as we move towards more complex mediums that incorporate the third dimension, like point clouds, the limitations of linear transform coding become apparent.
 
-Non-linear transform coding does not assume any fixed linear relationship among data points. It allows for a more flexible and adaptive representation that can capture the complexity of point clouds. This approach can lead to more accurate reconstructions and more efficient compression.
+**Non-Linear Transform Coding** does not assume any fixed linear relationship among data points. It allows for a more flexible and adaptive representation that can capture the complexity of point clouds. This approach can lead to more accurate reconstructions and more efficient compression.
 
 ## Project Goal
 
-This project follows the development of a Non-Linear Transform Coder for lossy data compression, leveraging Neural Networks to enhance point cloud data compression efficiency. The core objective is to devise a neural network architecture (Non-linear Transform) capable of encoding the complex spatial information inherent in point cloud data. Due to the high computational demands of processing point clouds, this endeavor necessitated an in-depth exploration of the interplay between hardware capabilities and software optimization within the TensorFlow framework. Databricks was used for compute to access NVIDIA GPU clusters for training the model. 
+This project follows the development of a **Non-Linear Transform Coder** for lossy data compression to enhance point cloud compression efficiency. By capturing underlying patterns in data distributions, neural networks can eliminate redundancy and create smaller datasets that contain the most salient features from the original data. Thus, the core objective is to devise a neural network architecture (Non-linear Transform) capable of encoding the complex spatial information inherent in point cloud data. 
+
 
 ## Background
 
-The following is diagram of a Non-linear Transform coder.
+### Non-Linear Transform Coder (NTC)
 
-![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/NTC.png?raw=true)
+The following is diagram of the NTC implemented in the project:
 
-Starting on the left we have our PointCloud to be compressed which is then fed through a neural network. This network is the forward transform, serving as the non-linear function that maps our input data to a latent compressed representation. 
+![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/NTC3.png?raw=true)
 
-At the heart of the non-linear transform coder is the N level quantizer. This component discretizes the continuous output of the forward transform into N buckets, destroying information in the processes, but enabling the data to be represented with fewer bits which is the main goal. 
+A NTC is a system designed to efficiently compress data. The system is composed of three primary components: the Forward and Inverse **Transforms**, the **Quantizer**, and the **Encoder-Decoder** pair.
 
-Next the data is passed through a lossless encoder-decoder pair, which seems redundant, but it allows us to obtain a code that can be used in the loss function when training the network.
+The **Transforms** map the high dimensional input data into a compressed low dimensional latent space. These transforms are non-linear, facilitating a more compact representation than linear methods typically allow.
 
-Following this process, the inverse transform attempts to reconstruct the original PointCloud using the quantized values.
+The **Quantizer** discretizes the continuous values from the latent space creating a finite set, which is essential for digital storage and transmission. This step is lossy and introduces reconstruction errors, but ultimately allows the data to be represented with fewer bits.
 
-The loss function is a critical component of achieving effective results. It is defined as the sum of the Reconstructed Distortion and λ multiplied by the Compressed Code rate. The Reconstructed Distortion is calculated using Chamfer Distance, which measures the average closest point distance between the original and reconstructed point clouds. The λ parameter helps to balance the importance between the fidelity of the reconstruction (low distortion) and the efficiency of the compression (low code rate). This ensure that the reconstructed point clouds are as close as possible to the original while maintaining a compact code representation.
+The **Lossless Encoder** creates the compressed code representation whose rate, measured in bits, is size of the resultant encoded object. This code is what will be stored or transmitted and is the point cloud in its most compressed representation. 
+
+While training the NTC, a balance must be struck between to inherently contradictory goals: minimizing the <span style="color:#ffd147">reconstruction distortion</span>, and minimizing the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
+
+
+### FoldingNet
+
+
+The literature on point cloud classification and segmentation is extensive. While distinct from compression, these studies offer valuable insights on the training methodologies and network architectures that can serve as the foundation for the development of an effective NTC transform architecture. Most notable is FoldingNet, an autoencoder for point clouds that aligns closely with the goal of compression. It consists of two main components: the encoder, and decoder.
+
+<figure align="center">
+  <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/FoldingNet.jpg?raw=true" alt="FoldingNet Architecture"/>
+  <figcaption style="text-align: center;">
+    <i>FoldingNet Architecture</i>
+    <br>
+    <cite>Source: https://arxiv.org/pdf/1712.07262.pdf</cite>
+  </figcaption>
+</figure>
+
+
+#### Encoder
+
+In contrast to the ordered and structured nature of pixel-based images, point cloud data is unstructured and inherently unordered. Consequently, some methods attempt to vowelize the point cloud to impose a structure suitable for traditional convolution operations. However, such voxelization becomes computational unfeasible at high resolutions necessitating a better approach. 
+
+The FoldingNet encoder can process point cloud’s directly, mitigating the computational overhead introduced by voxelization. Nonetheless, this approach introduces its own set of challenges. A key network requirement when processing directly is permutation invariance, that is, if two identical point clouds are evaluated by the model, one with a different order, they should produce an identical latent vector. To achieve this, FoldingNet employs shared weights across the MLP layers and processes points independently.
+
+This approach, however, raises the challenge of capturing the local geometry accurately since the relational information between points is diminished when they are processed separately. FoldingNet address this in two ways: firstly, by concatenating a local covariance matrix to accompany each point so local geometric information in not lost when processing points individually in MLP blocks, and secondly, by employing K-Nearest Neighbour (K-NN) graph layers to effectively aggregate local features.
+
+By hierarchically stacking graph layers, the "resolution" of the representation is progressively reduced allowing each subsequent layer to learn larger more abstract features.
+
+The output of the encoding layer is a 1x512 latent vector that contains the most salient abstract features from the original object. 
+
+#### Decoder
+
+The FoldingNet decoder is designed to reconstruct the original point cloud by "folding" a 2D grid back into the original 3D shape from information contained in the latent vector. 
+
+The universal approximation theorem suggests that a sufficiently deep MLP can approximate any non-linear function. In this case, the MLP is used to approximate a function that maps information from 2D -> 3D, allowing the grid to be transformed into the target 3D point cloud.
+
+By concatenating the latent vector on a 2D grid before passing it through the MLP, the decoder can reconstruct the orignal sample.
+
+<figure align="center">
+  <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/example_fold.gif?raw=true" alt="FoldingNet Example"/>
+  <figcaption style="text-align: center;">
+    <i>FoldingNet reconstructing a 3D couch from an inital 2D grid and couch latent vector</i>
+    <br>
+  </figcaption>
+</figure>
+
+
+### Integration
+
+Encoder and Decoder network architecture from FoldingNet will serve as a starting point for the forward and inverse transform respectively in the NTC. Following their successful implementation, network modification and hyperparameter tuning will ensue to explore what changes facilitate effective compression.
