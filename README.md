@@ -28,7 +28,7 @@ The **Quantizer** discretizes the continuous values from the latent space creati
 
 The **Lossless Encoder** creates the compressed code representation whose rate, measured in bits, is size of the resultant encoded object. This code is what will be stored or transmitted and is the point cloud in its most compressed representation. 
 
-While training the NTC, a balance must be struck between to inherently contradictory goals: minimizing the <span style="color:#ffd147">reconstruction distortion</span>, and minimizing the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
+While training the NTC, a balance must be struck between two inherently contradictory goals: minimizing the <span style="color:#ffd147">reconstruction distortion</span>, and minimizing the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
 
 
 ### FoldingNet
@@ -48,7 +48,7 @@ The literature on point cloud classification and segmentation is extensive. Whil
 
 #### Encoder
 
-In contrast to the ordered and structured nature of pixel-based images, point cloud data is unstructured and inherently unordered. Consequently, some methods attempt to vowelize the point cloud to impose a structure suitable for traditional convolution operations. However, such voxelization becomes computational unfeasible at high resolutions necessitating a better approach. 
+In contrast to the ordered and structured nature of pixel-based images, point cloud data is unstructured and inherently unordered. Consequently, some methods attempt to voxelize the point cloud to impose a structure suitable for traditional convolution operations. However, such voxelization becomes computational unfeasible at high resolutions necessitating a better approach. 
 
 The FoldingNet encoder can process point cloud’s directly, mitigating the computational overhead introduced by voxelization. Nonetheless, this approach introduces its own set of challenges. A key network requirement when processing directly is permutation invariance, that is, if two identical point clouds are evaluated by the model, one with a different order, they should produce an identical latent vector. To achieve this, FoldingNet employs shared weights across the MLP layers and processes points independently.
 
