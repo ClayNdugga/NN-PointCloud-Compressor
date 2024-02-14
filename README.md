@@ -66,13 +66,10 @@ The universal approximation theorem suggests that a sufficiently deep MLP can ap
 
 By concatenating the latent vector on a 2D grid before passing it through the MLP, the decoder can reconstruct the orignal sample.
 
-<figure align="center">
+<p align="center">
   <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/example_fold.gif?raw=true" alt="FoldingNet Example"/>
-  <figcaption style="text-align: center;">
-    <i>FoldingNet reconstructing a 3D couch from an inital 2D grid and couch latent vector</i>
-    <br>
-  </figcaption>
-</figure>
+   <i>FoldingNet reconstructing a 3D couch from an inital 2D grid and couch latent vector</i>
+</p>
 
 
 ### Integration
