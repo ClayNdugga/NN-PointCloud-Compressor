@@ -1,4 +1,4 @@
-# Nueral Network PointCloud Compression
+# Neural Network PointCloud Compression
 
 Note this project is ongoing: Sept 2023 - April 2024
 
