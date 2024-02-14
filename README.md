@@ -74,6 +74,10 @@ By concatenating the latent vector on a 2D grid before passing it through the ML
   </figcaption>
 </figure>
 
+<p align="center">
+  <img width="460" height="300" src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/example_fold.gif?raw=true">
+</p>
+
 
 ### Integration
 
