@@ -2,7 +2,7 @@
 
 Note this project is ongoing: Sept 2023 - April 2024
 
-## Introduction
+# Introduction
 Compression is crucial for efficient storage and transmission of media. Current compression methods, such as JPEG for images, and MPEG for videos rely on **Linear Transform Coding**. This works well for 2D media where spatial relationships are consistent and predictable. However, as we move towards more complex mediums that incorporate the third dimension, like point clouds, the limitations of linear transform coding become apparent.
 
 **Non-Linear Transform Coding** does not assume any fixed linear relationship among data points. It allows for a more flexible and adaptive representation that can capture the complexity of point clouds. This approach can lead to more accurate reconstructions and more efficient compression.
@@ -12,7 +12,73 @@ Compression is crucial for efficient storage and transmission of media. Current 
 This project follows the development of a **Non-Linear Transform Coder** for lossy data compression to enhance point cloud compression efficiency. By capturing underlying patterns in data distributions, neural networks can eliminate redundancy and create smaller datasets that contain the most salient features from the original data. Thus, the core objective is to devise a neural network architecture (Non-linear Transform) capable of encoding the complex spatial information inherent in point cloud data. 
 
 
-## Background
+## Requirements
+* Python 3.10
+* CUDA V12.2.140
+* tensorflow-compression
+
+Run
+```sh
+pip install -r requirements.txt
+```
+
+## Download Datasets
+Two datasets were used in the project were
+* ShapenetCore.v2
+* ModelNet40 
+
+Datasets can be downloaded from this [repository](https://github.com/antao97/PointCloudDatasets)
+
+
+## Training Model
+
+Run main.py with the training arguments
+
+```shell
+python -m main --dataset "modelnet40" --batch_size 32 --latent_dim 512 --model_name "ModelxRunx"
+```
+Access the real time results and pointcloud reconstruction visualization via Tensorboard
+
+```shell
+tensorboard --logdir="<path to logs/fit>"
+```
+
+## Folder Structure
+
+```python
+    tensorflow_project/
+    │
+    ├── data/                   # Data handling
+    │ ├── ModelNet40            # ModelNet40 Dataset Folder
+    │ ├── ShapeNet              # ShapeNet Dataset Folder
+    │ └── data_loader.py        # Script to load data for training/evaluation
+    │
+    ├── models/                 # Model architectures
+    │ ├── encoder.py            # Model Encoder definition
+    │ ├── decoder.py            # Model Decoder definition
+    │ └── model.py              # Complete AutoEncoder 
+    │
+    ├── training/               # Training 
+    │ └── train_utils.py        # Training utilities (callbacks, etc.)
+    │
+    ├── evaluation/             # Evaluation of models              To be Implemented...
+    │ └── evaluate.py           # Script to evaluate models         To be Implemented...
+    │
+    ├── config/                 # Configuration files
+    │ ├── configx.json          # Model Training hyperparameters
+    │ └── default.yaml          # Default Model Training hyperparameters
+    │
+    │
+    ├── notebooks/              # Jupyter notebooks
+    │ ├── EDA.ipynb             # Exploratory Data Analysis notebook
+    │ └── NTC.ipynb             # Simple NTC Outline Demo
+    │
+    ├── README.md               # Project overview and setup instructions
+    ├── requirements.txt        # Project dependencies for pip
+    └── .gitignore              # Specifies intentionally untracked files to ignore
+```
+
+# Background
 
 ### Non-Linear Transform Coder (NTC)
 
