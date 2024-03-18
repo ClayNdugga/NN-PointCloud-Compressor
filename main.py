@@ -20,6 +20,7 @@ args = parser.parse_args()
 print(f"args: {args}")
 print(f"args data: {args.dataset}")
 
+################################# Data Loading #################################
 
 data_path = "/home/user7/NTC Project/pointcloud_data/shapenetcorev2_hdf5_2048/" 
 if args.dataset == "shapenet": 
@@ -37,6 +38,8 @@ else:
 train_dataset = train_dataset.map(lambda x, _: x)
 test_dataset = test_dataset.map(lambda x, _: x)
 
+################################# Training Callbacks #################################
+
 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime(f"{args.model_name}-%Y-%m-%d--%H-%M-%S")
 tensorboard_callback = callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, profile_batch='300,350')
@@ -52,8 +55,11 @@ input_tensor = batch[0]
 plotting_callback = ReconstructionVisualizationCallback(log_dir=log_dir, input_tensor=tf.expand_dims(input_tensor, 0))
 saving_callback = SaveReconstructionsCallback(input_tensor=tf.expand_dims(input_tensor, 0))
 
-strategy = tf.distribute.MirroredStrategy()
+################################# Training  #################################
 
+
+
+strategy = tf.distribute.MirroredStrategy()
 with strategy.scope():
     model = PCNAutoEncoder(args.latent_dim, 0.01, debug=False)
     model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, weight_decay=1e-6))
