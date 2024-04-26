@@ -4,17 +4,16 @@ import tensorflow as tf
 from tensorflow.keras import callbacks
 
 from models.model import PCNAutoEncoder
-from training.train_utils import ReconstructionVisualizationCallback, AlphaSchedulerCallback, SaveReconstructionsCallback
+from training.train_utils import ReconstructionVisualizationCallback, AlphaSchedulerCallback, SaveReconstructionsCallback, UpdateMuVarianceCallback, LogMuVarianceCallback
 from data.data_loader import Model40Dataset, ShapeNetDataset 
 
 
-
-
 parser = argparse.ArgumentParser(description="Testing Script")
-parser.add_argument("--dataset", type=str, default="modelnet40", help="< modelnet40 | shapenet >")
-parser.add_argument("--latent_dim", type=int, default=512, help="< 512 | 1024 >")
-parser.add_argument("--batch_size", type=int, default=32, help="eg 4, 16, 32, ...")
-parser.add_argument("--model_name", type=str, default="", help="eg Foldnet Expirement 2")
+parser.add_argument("--dataset",    type=str,   default="modelnet40", help="< modelnet40 | shapenet >")
+parser.add_argument("--latent_dim", type=int,   default=512,          help="< 512 | 1024 >")
+parser.add_argument("--lmbda",      type=float, default=0.0001,       help="< 0.0000001 - 0.001>")
+parser.add_argument("--batch_size", type=int,   default=32,           help="eg 4, 16, 32, ...")
+parser.add_argument("--model_name", type=str,   default="",           help="eg PCN Expirement 2")
 
 args = parser.parse_args()
 print(f"args: {args}")
@@ -38,35 +37,38 @@ else:
 train_dataset = train_dataset.map(lambda x, _: x)
 test_dataset = test_dataset.map(lambda x, _: x)
 
+
 ################################# Training Callbacks #################################
 
-
-log_dir = "logs/fit/" + datetime.datetime.now().strftime(f"{args.model_name}-%Y-%m-%d--%H-%M-%S")
-tensorboard_callback = callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, profile_batch='300,350')
-early_stopping_callback = callbacks.EarlyStopping(monitor='val_loss', patience=200, verbose=1, mode='min', restore_best_weights=True)
-
+unqiue_run = datetime.datetime.now().strftime(f"{args.model_name}-%Y-%m-%d--%H-%M-%S")
+print(unqiue_run)
+log_dir = "logs/fit/" + unqiue_run
 
 count = 0
 for batch in test_dataset.take(5):
     count += 1
     if count > 4:
         break
-input_tensor = batch[0]
-plotting_callback = ReconstructionVisualizationCallback(log_dir=log_dir, input_tensor=tf.expand_dims(input_tensor, 0))
-saving_callback = SaveReconstructionsCallback(input_tensor=tf.expand_dims(input_tensor, 0))
+reconstruction_cloud = batch[0]
+
+cb = [
+    callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1),               
+    callbacks.EarlyStopping(monitor='val_recon_loss', patience=40, verbose=1, mode='min', restore_best_weights=True),
+    # callbacks.ModelCheckpoint(filepath=checkpoint_path, save_weights_only=True, mode='min', save_best_only=True),
+    UpdateMuVarianceCallback(train_dataset=train_dataset, update_freq=5),   
+    LogMuVarianceCallback(log_dir=log_dir, update_freq=5)  ,                
+    AlphaSchedulerCallback([20, 30, 40], [0.01, 0.1, 0.5, 1.0]),           
+    ReconstructionVisualizationCallback(log_dir=log_dir, input_tensor=tf.expand_dims(reconstruction_cloud, 0))
+]
+
 
 ################################# Training  #################################
 
 
+# strategy = tf.distribute.MirroredStrategy()
+# with strategy.scope():
 
-strategy = tf.distribute.MirroredStrategy()
-with strategy.scope():
-    model = PCNAutoEncoder(args.latent_dim, 0.01, debug=False)
-    model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, weight_decay=1e-6))
-    
-    a_callback = AlphaSchedulerCallback(model.alpha, [20, 40, 60], [0.01, 0.1, 0.5, 1.0])    
-
-    model.fit(train_dataset, epochs=250, validation_data=test_dataset, callbacks=[tensorboard_callback, plotting_callback, early_stopping_callback, a_callback]) #early_stopping_callback
-
-# model.save_weights(f"/home/user7/NTC Project/saved_models/pcn/pcn_weights3/{datetime.datetime.now().strftime('%m-%d-%H-%M-%S')}")
-#removed batch norm layers in decoder, new optimzer, different grid size
+model = PCNAutoEncoder(1024, alpha = 0.01, lmbda=args.lmbda)
+model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, weight_decay=1e-6))
+model.fit(train_dataset, epochs=200, validation_data=test_dataset, callbacks=cb)
+model.save(f"/home/user/NTC Project/saved_models/{unqiue_run}")

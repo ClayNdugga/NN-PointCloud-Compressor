@@ -9,13 +9,12 @@ Compression is crucial for efficient storage and transmission of media. Current 
 
 ## Project Goal
 
-This project follows the development of a **Non-Linear Transform Coder** for lossy data compression to enhance point cloud compression efficiency. By capturing underlying patterns in data distributions, neural networks can eliminate redundancy and create smaller datasets that contain the most salient features from the original data. Thus, the core objective is to devise a neural network architecture (Non-linear Transform) capable of encoding the complex spatial information inherent in point cloud data. 
+This project follows the development of a **Non-Linear Transform Coder** for lossy data compression to enhance point cloud compression efficiency. By capturing underlying patterns in data distributions, neural networks can eliminate redundancy and create smaller datasets that contain the most salient features from the original data. The project objective is to devise a neural network architecture (Non-linear Transform) capable of encoding the complex spatial information inherent in point cloud data. 
 
 
 ## Requirements
 * Python 3.10
 * CUDA V12.2.140
-* tensorflow-compression
 
 Run
 ```sh
@@ -61,8 +60,6 @@ tensorboard --logdir="<path to logs/fit>"
     ├── training/               # Training 
     │ └── train_utils.py        # Training utilities (callbacks, etc.)
     │
-    ├── evaluation/             # Evaluation of models              To be Implemented...
-    │ └── evaluate.py           # Script to evaluate models         To be Implemented...
     │
     ├── config/                 # Configuration files
     │ ├── configx.json          # Model Training hyperparameters
@@ -70,12 +67,11 @@ tensorboard --logdir="<path to logs/fit>"
     │
     │
     ├── notebooks/              # Jupyter notebooks
-    │ ├── EDA.ipynb             # Exploratory Data Analysis notebook
+    │ ├── PCN.ipynb             # Notebook for testing
     │ └── NTC.ipynb             # Simple NTC Outline Demo
     │
     ├── README.md               # Project overview and setup instructions
-    ├── requirements.txt        # Project dependencies for pip
-    └── .gitignore              # Specifies intentionally untracked files to ignore
+    └── requirements.txt        # Project dependencies for pip
 ```
 
 # Background
@@ -84,7 +80,7 @@ tensorboard --logdir="<path to logs/fit>"
 
 The following is diagram of the NTC implemented in the project:
 
-![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/NTC3.png?raw=true)
+![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_design.png?raw=true)
 
 A NTC is a system designed to efficiently compress data. The system is composed of three primary components: the Forward and Inverse **Transforms**, the **Quantizer**, and the **Encoder-Decoder** pair.
 
@@ -94,9 +90,26 @@ The **Quantizer** discretizes the continuous values from the latent space creati
 
 The **Lossless Encoder** creates the compressed code representation whose rate, measured in bits, is size of the resultant encoded object. This code is what will be stored or transmitted and is the point cloud in its most compressed representation. 
 
-While training the NTC, a balance must be struck between two inherently contradictory goals: minimizing the <span style="color:#ffd147">reconstruction distortion</span>, and minimizing the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
+While training the NTC, a balance must be struck between two inherently contradictory goals: minimizing the <span style="color:#7030A0">reconstruction distortion</span>, and minimizing the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
 
 
+
+## Results 
+
+
+<p align="center">
+  <img width="460" height="300" src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_reconstruction.png?raw=true">
+</p>
+<p align="center">
+  <i>FoldingNet reconstructing a 3D couch from an inital 2D grid and couch latent vector</i>
+</p>
+
+
+
+
+
+
+<!-- 
 ### FoldingNet
 
 
@@ -142,4 +155,12 @@ By concatenating the latent vector on a 2D grid before passing it through the ML
 
 ### Integration
 
-Encoder and Decoder network architecture from FoldingNet will serve as a starting point for the forward and inverse transform respectively in the NTC. Following their successful implementation, network modification and hyperparameter tuning will ensue to explore what changes facilitate effective compression.
+Encoder and Decoder network architecture from FoldingNet will serve as a starting point for the forward and inverse transform respectively in the NTC. Following their successful implementation, network modification and hyperparameter tuning will ensue to explore what changes facilitate effective compression. -->
+
+
+
+
+### Reference Repositories 
+* [Network Architechtures](https://github.com/lynetcha/completion3d)
+* [Pointcloud Rendering](https://github.com/zekunhao1995/PointFlowRenderer)
+

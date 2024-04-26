@@ -1,6 +1,71 @@
 import tensorflow as tf
+from tensorflow.keras import layers
 
-###################################### Encoder Utils ######################################
+###################################### General Utils ######################################
+
+@tf.keras.utils.register_keras_serializable(package="AutoEncoder", name="MLP")
+class MLP(layers.Layer):
+    def __init__(self, layer_dims, batch_normalization = False):
+        super(MLP, self).__init__()
+        self.layer_dims = layer_dims
+        self.fully_connected_layers = [layers.Dense(layer_dim) for layer_dim in self.layer_dims[:-1]]
+        self.batch_layers = [layers.BatchNormalization() for _ in self.layer_dims[:-1]]
+        self.final_dense = layers.Dense(self.layer_dims[-1])
+        self.batch_normalization = batch_normalization
+
+    def call(self, x):
+        for dense, batch_norm in zip(self.fully_connected_layers, self.batch_layers):
+            x = dense(x)
+            if self.batch_normalization:
+                x = batch_norm(x)
+            # x = tf.nn.relu(x)
+        x = self.final_dense(x)
+        return x
+    
+    def get_config(self):
+        config = super(MLP, self).get_config()
+        config.update({
+            'layer_dims': self.layer_dims,
+            'batch_normalization': self.batch_normalization,
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+@tf.keras.utils.register_keras_serializable(package="AutoEncoder", name="MLP_conv")
+class MLP_conv(layers.Layer):
+    def __init__(self, layer_dims, batch_normalization = False):
+        super(MLP_conv, self).__init__()
+        self.layer_dims = layer_dims
+        self.conv_layers = [layers.Conv1D(layer_dim, kernel_size = 1) for layer_dim in self.layer_dims[:-1]]
+        self.batch_layers = [layers.BatchNormalization() for _ in self.layer_dims[:-1]]
+        self.final_conv = layers.Conv1D(self.layer_dims[-1], kernel_size = 1)
+        self.batch_normalization = batch_normalization
+
+    def call(self, x):
+        for conv, batch_norm in zip(self.conv_layers, self.batch_layers):
+            x = conv(x)
+            if self.batch_normalization:
+                x = batch_norm(x)
+            x = tf.nn.relu(x)
+        x = self.final_conv(x)
+        return x
+    
+    def get_config(self):
+        config = super(MLP_conv, self).get_config()
+        config.update({
+            'layer_dims': self.layer_dims,
+            'batch_normalization': self.batch_normalization,
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+###################################### FN Encoder Utils ######################################
 
 
 def knn(x, k):
