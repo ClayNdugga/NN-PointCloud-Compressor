@@ -4,9 +4,7 @@ Note this project is ongoing: Sept 2023 - April 2024
 
 # Introduction
 
-Compression is crucial for efficient storage and transmission of media. Current compression methods, such as JPEG for images, and MPEG for videos rely on **Linear Transform Coding**. This works well for 2D media where spatial relationships are consistent and predictable. However, as we move towards more complex mediums that incorporate the third dimension, like point clouds, the limitations of linear transform coding become apparent.
-
-**Non-Linear Transform Coding** does not assume any fixed linear relationship among data points. It allows for a more flexible and adaptive representation that can capture the complexity of point clouds. This approach can lead to more accurate reconstructions and more efficient compression.
+Compression is crucial for efficient storage and transmission of media. Current compression methods, such as JPEG for images, and MPEG for videos rely on **Linear Transform Coding**. This works well for 2D media where spatial relationships are consistent and predictable. However, as we move towards more complex mediums that incorporate the third dimension, like point clouds, the limitations of linear transform coding become apparent. **Non-Linear Transform Coding** does not assume any fixed linear relationship among data points. It allows for a more flexible and adaptive representation that can capture the complexity of point clouds. This approach can lead to more accurate reconstructions and more efficient compression.
 
 ## Project Goal
 
@@ -37,7 +35,7 @@ Datasets can be downloaded from this [repository](https://github.com/antao97/Poi
 Run main.py with the training arguments
 
 ```shell
-python -m main --dataset "modelnet40" --batch_size 32 --latent_dim 512 --model_name "ModelxRunx"
+python -m main --dataset "modelnet40" --batch_size 32 --lmbda 0.000001 --latent_dim 512 --model_name "ModelxRunx"
 ```
 
 Access the real time results and pointcloud reconstruction visualization via Tensorboard
@@ -86,7 +84,7 @@ The following is diagram of the NTC implemented in the project:
 
 ![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_design.png?raw=true)
 
-A NTC is a system designed to efficiently compress data. The system is composed of three primary components: the Forward and Inverse **Transforms**, the **Quantizer**, and the **Encoder-Decoder** pair.
+A NTC is a system designed to efficiently compress data. The system is composed of three primary components: the Forward and Inverse **Transforms**, the **Quantizer**, and the Lossless **Coder-Decoder** pair.
 
 The **Transforms** map the high dimensional input data into a compressed low dimensional latent space. These transforms are non-linear, facilitating a more compact representation than linear methods typically allow.
 
@@ -99,10 +97,10 @@ While training the NTC, a balance must be struck between two inherently contradi
 ## Results
 
 <p align="center">
-  <img width="460" height="300" src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_reconstruction.png?raw=true">
+  <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_reconstruction.png?raw=true">
 </p>
 <p align="center">
-  <i>FoldingNet reconstructing a 3D couch from an inital 2D grid and couch latent vector</i>
+  <i>Final NTC Reconstruction performance</i>
 </p>
 
 <!--
