@@ -80,28 +80,52 @@ tensorboard --logdir="<path to logs/fit>"
 
 ### Non-Linear Transform Coder (NTC)
 
-The following is diagram of the NTC implemented in the project:
+The following is a high level overview of a NTC:
 
-![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_design.png?raw=true)
+![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/NTC3.png?raw=true)
 
-A NTC is a system designed to efficiently compress data. The system is composed of three primary components: the Forward and Inverse **Transforms**, the **Quantizer**, and the Lossless **Coder-Decoder** pair.
+A NTC is a system designed to efficiently compress data. The system is composed of three primary components: the Forward and Inverse **Transforms**, the **Quantizer**, and the Lossless **Encoder-Decoder** pair.
 
 The **Transforms** map the high dimensional input data into a compressed low dimensional latent space. These transforms are non-linear, facilitating a more compact representation than linear methods typically allow.
 
-The **Quantizer** discretizes the continuous values from the latent space creating a finite set, which is essential for digital storage and transmission. This step is lossy and introduces reconstruction errors, but ultimately allows the data to be represented with fewer bits.
+The **Quantizer** discretizes the continuous values from the latent space creating a finite set, which is essential for digital storage and transmission. This step is lossy and introduces reconstruction errors, but ultimately allows the data to be represented with a finite number of bits.
 
 The **Lossless Encoder** creates the compressed code representation whose rate, measured in bits, is size of the resultant encoded object. This code is what will be stored or transmitted and is the point cloud in its most compressed representation.
 
-While training the NTC, a balance must be struck between two inherently contradictory goals: minimizing the <span style="color:#7030A0">reconstruction distortion</span>, and minimizing the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
+While training the NTC, a balance must be struck between two inherently contradictory goals: minimizing the <span style="color:#fce303">reconstruction distortion</span>, and  the <span style="color:#5da4d7">code rate</span> (size in bits). To accommodate for this, the loss function is augmented with a training parameter λ that controls the trade-off between rate and distortion.
+
+## Point Completion Network
+
 
 ## Results
+The final NTC was implemented as follows:
+
+![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_design.png?raw=true)
+
+The model was trained on $N$ point clouds, $\{x_i\}_{i=1}^N$, where each point cloud $x_i$ consists of $n$ points in $\mathbb{R}^3$, i.e., $x_i = \{\vec{p}_1, \vec{p}_2, \ldots, \vec{p}_n\}$ with $\vec{p}_j \in \mathbb{R}^3$ for $j = 1, \ldots, n$ and $i = 1, \ldots, N$.  The loss function is given as
+
+
+$
+L_{NTC} =  \frac{1}{N} \sum_{i=1}^{N} \left(  d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i) + \lambda \sum_{j=1}^{m} -\log\big(q((\hat{y}_i)_j)\big) \right)
+$.
+
+$y_i \in \mathbb{R}^m$ and $\hat{y}_i \in \mathbb{R}^m$ denote the latent vector and quantized latent vector respectively for the $i$-th point cloud. $\hat{z}_i$ is the coarse reconstruction, and $\hat{x}_i$ is the fine reconstruction. $\hat{y}_i = g_a(x_i) + u$, $\hat{z}_i = g_{sc}(g_a(x_i) + u)$, $\hat{x}_i = g_{sf}(g_a(x_i) + u)$. $N = 13000, n = 2048, m = 1024$.
+
+$u \in \mathbb{R}^m$ is a vector where each component $u_i$ is independently drawn from a uniform distribution, specifically, for each $i$ in $1, \ldots, m$, we have $u_i \sim \text{Uniform}\left(-\frac{1}{2}, \frac{1}{2}\right)$. Uniform noise is used to emulate the distortion introdced by quantization while remainign differentiable during backpropagation. 
+
+The $q$ function denotes the pdf of a normal distribution used to estimate the <span style="color:#5da4d7">code rate</span> of the quantized latent vector $\hat{y}_i$. Each component $(\hat{y}_i)_j$ of the vector is assumed to be normally distributed with mean $\mu_j$ and variance $\sigma_j^2$. $\mu = [\mu_1, \mu_2, \ldots, \mu_m]$ and $\sigma^2 = [\sigma_1^2, \sigma_2^2, \ldots, \sigma_m^2]$ are determined by calculating the mean and variance of the quantized latent vector every 5 training epochs.
+
+
+The following image shows the reconstruction performance at 3 distinct values of $\lambda$. Each reconstruction places a different importance on reconstruction quality and compression size.
 
 <p align="center">
   <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_reconstruction.png?raw=true">
 </p>
 <p align="center">
-  <i>Final NTC Reconstruction performance</i>
+  <i> Reconstruction performance</i>
 </p>
+
+As expected, reconstructions with low distortion come at the cost of high code rates (size in bits), while high distortion reconstructions can be represented by a smaller code rate.
 
 <!--
 ### FoldingNet
