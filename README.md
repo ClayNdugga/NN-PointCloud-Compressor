@@ -107,6 +107,7 @@ The model was trained on $N$ point clouds, $\{x_i\}_{i=1}^N$, where each point c
 
 $ L_{NTC} =  \frac{1}{N} \sum_{i=1}^{N} \left(  d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i) + \lambda \sum_{j=1}^{m} -\log\big(q((\hat{y}_i)_j)\big) \right) $.
 
+$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
 
 
 $y_i \in \mathbb{R}^m$ and $\hat{y}_i \in \mathbb{R}^m$ denote the latent vector and quantized latent vector respectively for the $i$-th point cloud. $\hat{z}_i$ is the coarse reconstruction, and $\hat{x}_i$ is the fine reconstruction. $\hat{y}_i = g_a(x_i) + u$, $\hat{z}_i = g_{sc}(g_a(x_i) + u)$, $\hat{x}_i = g_{sf}(g_a(x_i) + u)$. $N = 13000, n = 2048, m = 1024$.
