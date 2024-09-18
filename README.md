@@ -78,7 +78,7 @@ tensorboard --logdir="<path to logs/fit>"
 
 # Background
 
-### Non-Linear Transform Coder (NTC)
+### Non-Linear Transform Coder (NTC)s
 
 The following is a high level overview of a NTC:
 
@@ -108,6 +108,9 @@ The model was trained on $N$ point clouds, $\{x_i\}_{i=1}^N$, where each point c
 $
 L_{NTC} =  \frac{1}{N} \sum_{i=1}^{N} \left(  d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i) + \lambda \sum_{j=1}^{m} -\log\big(q((\hat{y}_i)_j)\big) \right)
 $.
+
+![equation](https://latex.codecogs.com/png.latex?L_{NTC}=%20\frac{1}{N}%20\sum_{i=1}^{N}%20\left(%20d_{CD}(x_i,%20\hat{z}_i)%20+%20\alpha%20\cdot%20d_{CD}(x_i,%20\hat{x}_i)%20+%20\lambda%20\sum_{j=1}^{m}%20-\log\big(q((\hat{y}_i)_j)\big)%20\right))
+
 
 $y_i \in \mathbb{R}^m$ and $\hat{y}_i \in \mathbb{R}^m$ denote the latent vector and quantized latent vector respectively for the $i$-th point cloud. $\hat{z}_i$ is the coarse reconstruction, and $\hat{x}_i$ is the fine reconstruction. $\hat{y}_i = g_a(x_i) + u$, $\hat{z}_i = g_{sc}(g_a(x_i) + u)$, $\hat{x}_i = g_{sf}(g_a(x_i) + u)$. $N = 13000, n = 2048, m = 1024$.
 
