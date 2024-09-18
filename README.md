@@ -105,7 +105,7 @@ The final NTC was implemented as follows:
 The model was trained on $N$ point clouds, $\{x_i\}_{i=1}^N$, where each point cloud $x_i$ consists of $n$ points in $\mathbb{R}^3$, i.e., $x_i = \{\vec{p}_1, \vec{p}_2, \ldots, \vec{p}_n\}$ with $\vec{p}_j \in \mathbb{R}^3$ for $j = 1, \ldots, n$ and $i = 1, \ldots, N$.  The loss function is given as
 
 
-\( L_{NTC} =  \frac{1}{N} \sum_{i=1}^{N} \left(  d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i) + \lambda \sum_{j=1}^{m} -\log\big(q((\hat{y}_i)_j)\big) \right) \)
+$$L_{NTC} =  \frac{1}{N} \sum_{i=1}^{N} \left(  d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i) + \lambda \sum_{j=1}^{m} -\log\big(q((\hat{y}_i)_j)\big) \right)$$
 
 .
 
