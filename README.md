@@ -100,7 +100,7 @@ The literature on point cloud classification and segmentation is extensive. Whil
 
 <figure align="center">
   <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/fnarch.png?raw=true" alt="FoldingNet Architecture"/>
-  <figcaption style="text-align: center;">
+  <figcaption style="text-align: center;" align="center">
     <i>FoldingNet Architecture</i>
     <br>
     <cite>Source: https://arxiv.org/pdf/1712.07262.pdf</cite>
