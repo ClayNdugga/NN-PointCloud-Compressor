@@ -1,6 +1,5 @@
 # Neural Network PointCloud Compression
 
-
 ## Introduction
 
 Efficient compression is essential for the storage and transmission of data. While traditional methods like JPEG for images and MPEG for videos are effective for 2D media, they struggle with 3D data formats like point clouds. This project aims to enhance point cloud compression using Non-Linear Transform Coding (NTC), which can better handle the complexities of 3D data.
@@ -8,12 +7,13 @@ Efficient compression is essential for the storage and transmission of data. Whi
 Our goal is to develop a deep learning-based Neural Network PointCloud Compressor capable of achieving lossy compression while maintaining high-quality reconstructions.cloud data.
 
 ## Project Objectives
+
 The project focuses on designing a Non-Linear Transform Coder (NTC) for lossy point cloud compression. The architecture leverages neural networks to capture spatial patterns in point cloud data and eliminates redundancy, leading to efficient compression.
 
 Key Aspects:
 
-* Developing a neural network architecture that can encode 3D point cloud data.
-* Balancing compression size (code rate) and reconstruction quality.
+- Developing a neural network architecture that can encode 3D point cloud data.
+- Balancing compression size (code rate) and reconstruction quality.
 
 ## Installation
 
@@ -88,19 +88,19 @@ The following is a high level overview of a NTC:
 
 Non-Linear Transform Coding (NTC) is a method designed for efficient data compression. It consists of:
 
-* **Non-Linear Transforms**: Maps high-dimensional data into a compressed low-dimensional latent space, capturing the essential features more compactly than linear methods.
-* **Quantizer**: Discretizes the latent space, introducing a small amount of reconstruction error but enabling efficient digital storage and transmission.
-* **Lossless Encoder-Decoder**: Encodes the quantized data into a compressed format for storage or transmission.
+- **Non-Linear Transforms**: Maps high-dimensional data into a compressed low-dimensional latent space, capturing the essential features more compactly than linear methods.
+- **Quantizer**: Discretizes the latent space, introducing a small amount of reconstruction error but enabling efficient digital storage and transmission.
+- **Lossless Encoder-Decoder**: Encodes the quantized data into a compressed format for storage or transmission.
 
 In training the NTC, a trade-off must be made between <span style="color:#fce303">reconstruction quality</span> and <span style="color:#5da4d7">compression size</span> (size in bits). This trade-off is controlled via a regularization parameter $λ$ in the loss function.
 
-### Network Architectures 
+### Network Architectures
 
 The literature on point cloud classification and segmentation is extensive. While distinct from compression, these studies offer valuable insights on the training methodologies and network architectures that can serve as the foundation for the development of an effective NTC transform architecture. Most notable is FoldingNet (FN), an autoencoder for point clouds that aligns closely with the goal of compression. It consists of two main components: the encoder, and decoder.
 
 <figure align="center">
   <img src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/fnarch.png?raw=true" alt="FoldingNet Architecture"/>
-  <figcaption style="text-align: center;" align="center">
+  <figcaption style="text-align: center;">
     <i>FoldingNet Architecture</i>
     <br>
     <cite>Source: https://arxiv.org/pdf/1712.07262.pdf</cite>
@@ -128,7 +128,6 @@ The universal approximation theorem suggests that a sufficiently deep MLP can ap
 
 By concatenating the latent vector on a 2D grid before passing it through the MLP, the decoder can reconstruct the original sample.
 
-
 <p align="center">
   <img width="460" height="300" src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/example_fold.gif?raw=true">
 </p>
@@ -136,11 +135,12 @@ By concatenating the latent vector on a 2D grid before passing it through the ML
   <i>FoldingNet reconstructing a 3D couch from an initial 2D grid and couch latent vector</i>
 </p>
 
-#### PCN Decoder 
+#### PCN Decoder
 
 The Point Completion Network (PCN) decoder improves on FoldingNet by addressing some of its limitations. Instead of relying on a single grid, PCN employs multiple grids to handle complex point cloud structures more effectively. This approach allows for better reconstructions, especially for intricate shapes.
 
 The PCN decoder’s loss function balances coarse and fine reconstructions:
+
 ```math
 L_{PCN} = d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i)
 
@@ -157,13 +157,11 @@ During training, the parameter $\alpha$ starts small, allowing the network to pr
   </figcaption>
 </figure>
 
-
-
 ## Results
+
 The final NTC was implemented as follows:
 
 ![alt text](https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/final_design.png?raw=true)
-
 
 The model was trained on $N = 13,000$ point clouds, where each point cloud $x_i$ consists of $n = 2048$ points in $\mathbb{R}^3$. The points were transformed into a latent representation of size $m = 1024$, before being quantized for transmission or storage.
 
@@ -172,15 +170,16 @@ The loss function guiding this process is given by:
 ```math
 L_{NTC} =  \frac{1}{N} \sum_{i=1}^{N} \left(  d_{CD}(x_i, \hat{z}_i) + \alpha \cdot d_{CD}(x_i, \hat{x}_i) + \lambda \sum_{j=1}^{m} -\log\big(q(\hat{y}_{ij})\big) \right)
 ```
+
 Here:
+
 - ${x}_i$ refers to the original pointcloud
 - $\hat{x}_i$ refers to the fine reconstruction
 - $\hat{z}_i$ represents a coarse reconstruction of the input
 - $d_{CD}$ is the Chamfer distance (a distance measure of similiarity)
 - The term involving $q(\hat{y}_{ij})$ calculates the code rate by modeling each component of the quantized latent vector $\hat{y}_i$ using a Gaussian distribution.
 
-
-To compute the code rate, the quantized latent representation $\hat{y}_i$ is assumed to follow a Gaussian distribution, where each component $\hat{y}_{ij}$ has a mean $\mu_j$ and variance $\sigma_j^2$. The rate is calculated by summing the negative log-likelihood of the probability density function (pdf) of the Gaussian distribution over all components:
+To compute the code rate, the quantized latent representation $ \hat{y}_i $ is assumed to follow a Gaussian distribution, where each component $ \hat{y}_{ij} $ has a mean $\mu_j$ and variance $\sigma_j^2$. The rate is calculated by summing the negative log-likelihood of the probability density function (pdf) of the Gaussian distribution over all components:
 
 ```math
 -\log q(\hat{y}_{ij}) \quad \text{where} \quad q(\hat{y}_{ij}) \sim \mathcal{N}(\mu_j, \sigma_j^2)
@@ -188,11 +187,9 @@ To compute the code rate, the quantized latent representation $\hat{y}_i$ is ass
 
 The parameters $\mu_j$ and $\sigma_j^2$ are updated every 5 epochs to ensure that the model’s estimate of the data distribution is accurate. This regular update mechanism helps maintain a high degree of compression efficiency by continually refining the latent representation to match the actual distribution of the training data.
 
-
-
 The NTC is tasked with balancing the trade-off between compression rate (measured in bits) and reconstruction quality. This balance is controlled by the regularization parameter $\lambda$ in the loss function. A smaller $\lambda$ prioritizes high reconstruction accuracy at the expense of larger code rates, while a larger $\lambda$ leads to smaller code rates but with lower reconstruction quality.
 
-As depicted in the Rate-Distortion (RD) curve below, as 
+As depicted in the Rate-Distortion (RD) curve below, as
 $\lambda$ increases, we observe an increase in code efficiency at the cost of some degradation in point cloud reconstruction:
 
 <p align="center">
@@ -211,7 +208,7 @@ The following visualization illustrates how different values of $\lambda$ affect
   <i> Reconstruction performance</i>
 </p>
 
-<!-- 
+<!--
 
 ### FoldingNet
 
