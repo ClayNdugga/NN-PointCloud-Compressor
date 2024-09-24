@@ -126,14 +126,14 @@ The FoldingNet decoder is designed to reconstruct the original point cloud by "f
 
 The universal approximation theorem suggests that a sufficiently deep MLP can approximate any non-linear function. In this case, the MLP is used to approximate a function that maps information from 2D -> 3D, allowing the grid to be transformed into the target 3D point cloud.
 
-By concatenating the latent vector on a 2D grid before passing it through the MLP, the decoder can reconstruct the orignal sample.
+By concatenating the latent vector on a 2D grid before passing it through the MLP, the decoder can reconstruct the original sample.
 
 
 <p align="center">
   <img width="460" height="300" src="https://github.com/ClayNdugga/NN-PointCloud-Compressor/blob/main/assets/example_fold.gif?raw=true">
 </p>
 <p align="center">
-  <i>FoldingNet reconstructing a 3D couch from an inital 2D grid and couch latent vector</i>
+  <i>FoldingNet reconstructing a 3D couch from an initial 2D grid and couch latent vector</i>
 </p>
 
 #### PCN Decoder 
@@ -176,7 +176,7 @@ Here:
 - ${x}_i$ refers to the original pointcloud
 - $\hat{x}_i$ refers to the fine reconstruction
 - $\hat{z}_i$ represents a coarse reconstruction of the input
-- $d_{CD}$ is the Chamfer distance (distance measure of similiarity)
+- $d_{CD}$ is the Chamfer distance (a distance measure of similiarity)
 - The term involving $q(\hat{y}_{ij})$ calculates the code rate by modeling each component of the quantized latent vector $\hat{y}_i$ using a Gaussian distribution.
 
 
